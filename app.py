@@ -6,13 +6,20 @@ import pandas as pd
 # Set up PageSpeed Insights API
 API_KEY = st.secrets["PAGESPEED_API_KEY"]
 
-# Function to fetch URLs from the sitemap
+# Function to fetch URLs from the sitemap and nested sitemaps
 def get_sitemap_urls(sitemap_url):
     try:
         response = requests.get(sitemap_url)
         response.raise_for_status()  # Raise an error if the request fails
         root = ET.fromstring(response.content)
-        urls = [elem.text for elem in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
+        urls = []
+        # Iterate over sitemap entries
+        for elem in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc'):
+            loc_url = elem.text
+            if loc_url.endswith('.xml'):  # If the URL points to a sitemap, fetch nested URLs
+                urls.extend(get_sitemap_urls(loc_url))
+            else:
+                urls.append(loc_url)
         return urls
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching sitemap: {e}")
@@ -28,10 +35,10 @@ def get_pagespeed_insights(url):
         response = requests.get(api_url)
         response.raise_for_status()  # Raise an error for failed requests
         data = response.json()
-        
+
         lighthouse_result = data.get('lighthouseResult', {})
         categories = lighthouse_result.get('categories', {})
-        
+
         performance_score = categories.get('performance', {}).get('score', 0) * 100
         accessibility_score = categories.get('accessibility', {}).get('score', 0) * 100
         best_practices_score = categories.get('best-practices', {}).get('score', 0) * 100
@@ -58,7 +65,8 @@ def main():
         if sitemap_url:
             st.info('Fetching URLs from sitemap...')
             urls = get_sitemap_urls(sitemap_url)
-            
+
+            # Ensure URLs are found and are valid webpages
             if not urls:
                 st.error('No URLs found or an error occurred while fetching the sitemap.')
                 return
