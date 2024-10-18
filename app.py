@@ -1,11 +1,10 @@
 import streamlit as st
 import requests
 import xml.etree.ElementTree as ET
-from urllib.parse import urlparse
 from googleapiclient.discovery import build
 import pandas as pd
 
-# Get the API key from secrets
+# Set up PageSpeed Insights API
 API_KEY = st.secrets["AIzaSyDj827EEe82d2XQPkg9ulTf5LLmHgd5Gyo"]
 
 def get_sitemap_urls(sitemap_url):
@@ -18,7 +17,6 @@ def get_pagespeed_insights(url):
     service = build('pagespeedonline', 'v5', developerKey=API_KEY)
     response = service.pagespeedapi().runpagespeed(url=url, strategy='MOBILE').execute()
     
-    # Extract relevant metrics
     lighthouse_result = response.get('lighthouseResult', {})
     categories = lighthouse_result.get('categories', {})
     
@@ -58,7 +56,6 @@ def main():
             st.success('Analysis complete!')
             st.dataframe(df)
             
-            # Create a CSV download link
             csv = df.to_csv(index=False)
             st.download_button(
                 label="Download CSV",
