@@ -1,0 +1,4 @@
+streamlit
+requests
+google-api-python-client
+pandas
