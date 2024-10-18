@@ -99,19 +99,24 @@ def main():
             st.info(f'Found {len(urls)} URLs. Analyzing PageSpeed Insights...')
             results = []
 
+            # Create an empty dataframe for real-time updates
+            df_placeholder = st.empty()
+
             progress_bar = st.progress(0)
             for i, url in enumerate(urls):
                 result = get_pagespeed_insights(url)
                 if result:
                     results.append(result)
-                progress_bar.progress((i + 1) / len(urls))
+                    # Convert results to a dataframe and display them in real-time
+                    df = pd.DataFrame(results)
+                    df_placeholder.dataframe(df)  # Update the table with new results
+                progress_bar.progress((i + 1) / len(urls))  # Update progress bar
 
             if results:
-                df = pd.DataFrame(results)
                 st.success('Analysis complete!')
-                st.dataframe(df)
-
-                csv = df.to_csv(index=False)
+                
+                # Allow downloading the final CSV
+                csv = pd.DataFrame(results).to_csv(index=False)
                 st.download_button(
                     label="Download CSV",
                     data=csv,
