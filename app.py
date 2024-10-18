@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 import pandas as pd
 
 # Set up PageSpeed Insights API
-API_KEY = 'AIzaSyCy9Uhl3KJRkIn5l-0GHwULoknRm8H-EY4'  # Replace with your actual API key
+API_KEY = 'AIzaSyDj827EEe82d2XQPkg9ulTf5LLmHgd5Gyo'  # Replace with your actual API key
 
 def get_sitemap_urls(sitemap_url):
     response = requests.get(sitemap_url)
