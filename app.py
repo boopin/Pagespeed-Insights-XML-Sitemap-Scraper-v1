@@ -41,11 +41,17 @@ def get_pagespeed_insights(url):
         categories = lighthouse_result.get('categories', {})
         audits = lighthouse_result.get('audits', {})
 
-        # Main category scores
-        performance_score = categories.get('performance', {}).get('score', 0) * 100
-        accessibility_score = categories.get('accessibility', {}).get('score', 0) * 100
-        best_practices_score = categories.get('best-practices', {}).get('score', 0) * 100
-        seo_score = categories.get('seo', {}).get('score', 0) * 100
+        # Safely extract category scores
+        performance_score = categories.get('performance', {}).get('score', None)
+        accessibility_score = categories.get('accessibility', {}).get('score', None)
+        best_practices_score = categories.get('best-practices', {}).get('score', None)
+        seo_score = categories.get('seo', {}).get('score', None)
+
+        # Handle cases where any of these scores are missing
+        performance_score = performance_score * 100 if performance_score is not None else 'N/A'
+        accessibility_score = accessibility_score * 100 if accessibility_score is not None else 'N/A'
+        best_practices_score = best_practices_score * 100 if best_practices_score is not None else 'N/A'
+        seo_score = seo_score * 100 if seo_score is not None else 'N/A'
 
         # Detailed audit scores for individual metrics
         first_contentful_paint = audits.get('first-contentful-paint', {}).get('displayValue', 'N/A')
@@ -70,6 +76,9 @@ def get_pagespeed_insights(url):
         }
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching PageSpeed Insights for {url}: {e}")
+        return None
+    except KeyError:
+        st.error(f"KeyError occurred when processing the response for {url}. Some metrics may be missing.")
         return None
 
 # Main function to run the app
