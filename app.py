@@ -102,8 +102,14 @@ def main():
             # Create an empty dataframe for real-time updates
             df_placeholder = st.empty()
 
+            # Create a placeholder for the current URL being processed
+            url_status_placeholder = st.empty()
+
             progress_bar = st.progress(0)
             for i, url in enumerate(urls):
+                # Display current progress in terms of URLs being analyzed
+                url_status_placeholder.text(f'Analyzing {i+1} out of {len(urls)} URLs: {url}')
+                
                 result = get_pagespeed_insights(url)
                 if result:
                     results.append(result)
